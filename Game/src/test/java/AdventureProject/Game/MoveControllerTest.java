@@ -7,6 +7,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+// Spring Security test imports
+import org.springframework.security.test.context.support.WithMockUser;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import AdventureProject.Game.Controllers.MoveController;
@@ -32,6 +36,7 @@ public class MoveControllerTest {
     private MoveService moveService;
 
     @Test
+    @WithMockUser
     public void movePlayerTest() throws Exception {
         // Arrange
         String direction = "north";
@@ -40,8 +45,9 @@ public class MoveControllerTest {
 
         // Act & Assert
         mockMvc.perform(post("/game/move")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(new ObjectMapper().writeValueAsString(moveRequest))) // Use Jackson to serialize to JSON
+        .with(csrf())
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(new ObjectMapper().writeValueAsString(moveRequest)))
                 .andExpect(status().isOk())
                 .andExpect(content().string("You moved " + direction));
     }
